@@ -22,6 +22,12 @@
 
   .faixa{position:relative;overflow:hidden;background:linear-gradient(90deg,#7a4a00,#c98a00 45%,#f2c53d);color:#fff;padding:16px 30px;display:flex;align-items:center;gap:18px;min-height:96px}
   .faixa::before{content:"";position:absolute;top:0;right:150px;bottom:0;width:55%;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cg fill='none' stroke='white' stroke-opacity='.28' stroke-width='1.6'%3E%3Cpath d='M28 2l26 15v30L28 62 2 47V17z'/%3E%3Cpath d='M28 64l26 15v30'/%3E%3Cpath d='M28 64L2 79v30'/%3E%3C/g%3E%3C/svg%3E") right center/56px 97px repeat;-webkit-mask-image:linear-gradient(90deg,transparent,#000 45%);mask-image:linear-gradient(90deg,transparent,#000 45%)}
+  .faixa>.abelhas{position:absolute;right:210px;top:0;bottom:0;width:360px;pointer-events:none;z-index:1}
+  .ab{position:absolute;width:54px;height:41px;filter:drop-shadow(0 2px 3px rgba(60,42,0,.35));animation:zumbir 5s ease-in-out infinite}
+  .ab1{right:270px;top:14px;transform:rotate(-8deg)} .ab2{right:150px;top:52px;width:40px;height:30px;animation-delay:-1.7s;transform:rotate(6deg)} .ab3{right:70px;top:8px;width:34px;height:26px;animation-delay:-3.1s;transform:rotate(-14deg)}
+  @keyframes zumbir{0%,100%{translate:0 0}50%{translate:6px -5px}}
+  @media(prefers-reduced-motion:reduce){.ab{animation:none}}
+  @media(max-width:900px){.abelhas{display:none}}
   .faixa::after{content:"";position:absolute;top:0;right:0;bottom:0;width:190px;background:linear-gradient(270deg,rgba(60,42,0,.55),rgba(60,42,0,.4) 70%,rgba(60,42,0,0))}
   .faixa>*{position:relative;z-index:1}
   .faixa .sep{width:1px;align-self:stretch;margin:6px 0;background:rgba(255,255,255,.35)}
@@ -169,6 +175,23 @@
 </head>
 <body>
 <header class="faixa">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="abelha" viewBox="0 0 64 48">
+  <clipPath id="abelha-corpo"><ellipse cx="34" cy="30" rx="19" ry="12"/></clipPath>
+  <ellipse cx="27" cy="13" rx="11" ry="7.5" transform="rotate(-28 27 13)" fill="#fff" fill-opacity=".8" stroke="#fff" stroke-opacity=".9"/>
+  <ellipse cx="41" cy="11" rx="11" ry="7.5" transform="rotate(22 41 11)" fill="#fff" fill-opacity=".8" stroke="#fff" stroke-opacity=".9"/>
+  <ellipse cx="34" cy="30" rx="19" ry="12" fill="#f7b500"/>
+  <g clip-path="url(#abelha-corpo)" fill="#3b2a00"><rect x="26" y="14" width="5" height="32"/><rect x="36" y="14" width="5" height="32"/><rect x="46" y="14" width="5" height="32"/></g>
+  <path d="M52 30l7-2.2v4.4z" fill="#3b2a00"/>
+  <circle cx="14" cy="31" r="7.5" fill="#3b2a00"/>
+  <circle cx="11.5" cy="29.5" r="1.7" fill="#fff"/>
+  <path d="M10 24.5c-1.6-3-3.6-4.3-6-4.8M15 24c.8-3.4 2.6-5.2 5-6" fill="none" stroke="#3b2a00" stroke-width="1.6" stroke-linecap="round"/>
+</symbol></defs></svg>
+<div class="abelhas" aria-hidden="true">
+  <svg class="ab ab1"><use href="#abelha"/></svg>
+  <svg class="ab ab2"><use href="#abelha"/></svg>
+  <svg class="ab ab3"><use href="#abelha"/></svg>
+</div>
   <svg class="logo" viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 30 32 10l24 20"/><path d="M14 27v24h36V27"/><path d="M26 51V37h12v14"/><path d="M32 8c4-5 10-5 12-3-1 5-6 7-12 3z"/></svg>
   <span class="sep" aria-hidden="true"></span>
   <div><h1>Acompanhamento mensal</h1><p>ATEG &middot; Mais conhecimento, melhores resultados</p></div>
