@@ -167,6 +167,8 @@
   .g-tit{flex:1;min-width:150px}
   .graf h2{color:var(--ink);font-size:16.5px;font-weight:700;display:block}
   .graf .formula{margin:2px 0 0;font-size:12px}
+  .kpi .ico{width:44px;height:44px;color:#fff;background:linear-gradient(135deg,var(--cor),color-mix(in srgb,var(--cor) 62%,#fff));box-shadow:0 4px 10px color-mix(in srgb,var(--cor) 38%,transparent)} .kpi .ico svg{width:22px;height:22px;stroke-width:1.9}
+  .kpi:hover .ico{transform:rotate(-6deg) scale(1.06)} .kpi .ico{transition:transform .2s}
   .ico.g{width:46px;height:46px;background:var(--cor);color:#fff} .ico.g svg{width:23px;height:23px}
   .pill{text-align:center;padding:7px 14px;border-radius:10px;min-width:118px;background:color-mix(in srgb,var(--cor) 11%,white);color:var(--cor)}
   .pill b{display:block;font-size:14px;white-space:nowrap} .pill small{font-size:10.5px;opacity:.85}
@@ -260,6 +262,9 @@ const ICONES = {
   casa:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
   moedas:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
   garrafa:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+  favo:'<path d="M8.0 2.9 L12.0 5.2 L12.0 9.8 L8.0 12.1 L4.0 9.8 L4.0 5.2z"/><path d="M16.0 2.9 L20.0 5.2 L20.0 9.8 L16.0 12.1 L12.0 9.8 L12.0 5.2z"/><path d="M12.0 9.9 L16.0 12.2 L16.0 16.8 L12.0 19.1 L8.0 16.8 L8.0 12.2z"/>',
+  pote:'<rect x="8" y="3" width="8" height="3.5" rx="1"/><path d="M7 8.500h10a1 1 0 0 1 1 1V19a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9.500a1 1 0 0 1 1-1z"/><path d="M9.500 13h5M9.500 16.500h5"/>',
+  abelha:'<ellipse cx="12" cy="14" rx="4.800" ry="6"/><path d="M7.500 12.500h9M7.500 16.500h9"/><path d="M9.500 8.500C7.500 4.500 4 5 4 7.500s3 3.500 5.500 2.500M14.500 8.500c2-4 5.500-3.500 5.500-1s-3 3.500-5.500 2.500"/><path d="M10.500 8 9 4.500M13.500 8 15 4.500"/>',
   gota:'<path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/><path d="M9.5 14a2.6 2.6 0 0 0 2.2 2.4" opacity=".7"/>',
   pessoas:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 010 6"/><path d="M18 14c2 .8 3 2.6 3 6"/>',
   barras:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/>',
@@ -420,15 +425,15 @@ async function atualiza(){
     `<div class="kpi"><div class="k-topo">${icoGrande(ic, cor)}<span class="k-rot">${rot}</span></div><b${String(valor).includes('-') ? ' class="neg"' : ''}>${valor}</b><div class="k-var">${parcial ? '<span class="parc">em andamento</span>' : (variacao===undefined ? '' : seta(variacao) + '<small>vs. mês anterior</small>')}</div>${spark(semParcial(serie), cor)}</div>`;
   if (ult) $('periodo').textContent = 'Período: ' + $('de').value + ' a ' + $('ate').value + '  ·  Cartões: ' + ult.mes + (parcial ? ' (mês em andamento)' : '');
   $('kpis').innerHTML = ult ? [
-    `<div class="kpi"><div class="k-topo">${icoGrande('casa','var(--c-neutro)')}<span class="k-rot">${$('sit').value==='inativa' ? 'Propriedades inativas' : 'Propriedades ativas'}</span></div><b>${nf.format(ult.propriedades_total)}</b><div class="k-var">${nf.format(ult.propriedades)} com lançamento no mês</div>${spark(semParcial(d.map(x=>x.propriedades)),'#6a5a3d')}</div>`,
-    cartao('Receita bruta', brl2(ult.receita_bruta), ult.var_receita_pct, d.map(x=>x.receita_bruta), 'var(--c-receita)', 'moedas'),
-    cartao('Venda de mel', brl2(ult.venda_leite), ult.var_venda_leite_pct, d.map(x=>x.venda_leite), 'var(--c-venda)', 'garrafa'),
-    cartao('Margem bruta da atividade', brl2(ult.margem_bruta), ult.var_margem_pct, d.map(x=>x.margem_bruta), 'var(--c-mat)', 'barras'),
-    cartao('Margem bruta da venda de mel', brl2(ult.margem_leite), ult.var_margem_leite_pct, d.map(x=>x.margem_leite), 'var(--c-mleite)', 'calc'),
-    cartao('Mel vendido (kg)', nf.format(ult.producao), ult.var_producao_pct, d.map(x=>x.producao), 'var(--c-prod)', 'gota'),
-    cartao('Mel vendido por produtor', nf.format(ult.producao_media_produtor), ult.var_prod_media_pct, d.map(x=>x.producao_media_produtor), 'var(--c-media)', 'pessoas'),
-    cartao('Enxames vendidos', nf.format(ult.unidades||0), ult.var_unidades_pct, d.map(x=>x.unidades), 'var(--c-un)', 'gota'),
-    cartao('Enxames vendidos por produtor', nf.format(ult.unidades_media_produtor||0), ult.var_un_media_pct, d.map(x=>x.unidades_media_produtor), 'var(--c-un)', 'pessoas')
+    `<div class="kpi"><div class="k-topo">${icoGrande('favo','#e8590c')}<span class="k-rot">${$('sit').value==='inativa' ? 'Propriedades inativas' : 'Propriedades ativas'}</span></div><b>${nf.format(ult.propriedades_total)}</b><div class="k-var">${nf.format(ult.propriedades)} com lançamento no mês</div>${spark(semParcial(d.map(x=>x.propriedades)),'#e8590c')}</div>`,
+    cartao('Receita bruta', brl2(ult.receita_bruta), ult.var_receita_pct, d.map(x=>x.receita_bruta), '#f59f00', 'moedas'),
+    cartao('Venda de mel', brl2(ult.venda_leite), ult.var_venda_leite_pct, d.map(x=>x.venda_leite), '#12a4a8', 'pote'),
+    cartao('Margem bruta da atividade', brl2(ult.margem_bruta), ult.var_margem_pct, d.map(x=>x.margem_bruta), '#7cb518', 'barras'),
+    cartao('Margem bruta da venda de mel', brl2(ult.margem_leite), ult.var_margem_leite_pct, d.map(x=>x.margem_leite), '#2fa84f', 'calc'),
+    cartao('Mel vendido (kg)', nf.format(ult.producao), ult.var_producao_pct, d.map(x=>x.producao), '#3b82f6', 'gota'),
+    cartao('Mel vendido por produtor', nf.format(ult.producao_media_produtor), ult.var_prod_media_pct, d.map(x=>x.producao_media_produtor), '#a855f7', 'pessoas'),
+    cartao('Enxames vendidos', nf.format(ult.unidades||0), ult.var_unidades_pct, d.map(x=>x.unidades), '#ff7a1a', 'abelha'),
+    cartao('Enxames vendidos por produtor', nf.format(ult.unidades_media_produtor||0), ult.var_un_media_pct, d.map(x=>x.unidades_media_produtor), '#f0589a', 'pessoas')
   ].join('') : '<p>Sem dados para o filtro.</p>';
   carregaDestaques(q, parcial);
   carregaCausas(q);
