@@ -69,18 +69,27 @@ def _where(supervisor=None, tecnico=None, projeto=None, propriedade=None, situac
 
 @app.get("/api/filtros")
 def filtros(supervisor: str | None = None, tecnico: str | None = None, projeto: str | None = None,
-            municipio: str | None = None, situacao: str | None = None):
+            municipio: str | None = None, situacao: str | None = None,
+            de: str | None = None, ate: str | None = None):
     """Listas dos filtros. Cada lista respeita TODOS os outros filtros já escolhidos (filtros em cascata)."""
+    def _periodo(w, p):
+        # só quem tem lançamento no período escolhido (De/Até)
+        if de:
+            w.append("mes >= :pde"); p["pde"] = max(de, MES_INICIO)
+        if ate:
+            w.append("mes <= :pate"); p["pate"] = ate
     escolhidos = {"supervisor": supervisor, "tecnico": tecnico, "projeto": projeto, "municipio": municipio}
     with engine.connect() as con:
         def lista(coluna):
             outros = {k: v for k, v in escolhidos.items() if k != coluna}
             w, p = _where(situacao=situacao, **outros)
             w.append(f"{coluna} IS NOT NULL")
+            _periodo(w, p)
             return [r[0] for r in con.execute(text(
                 f"SELECT DISTINCT {coluna} FROM {TABLE} WHERE {' AND '.join(w)} ORDER BY 1"), p)]
         projetos, sups, tecs, muns = lista("projeto"), lista("supervisor"), lista("tecnico"), lista("municipio")
         w2, p2 = _where(supervisor, tecnico, projeto, None, situacao, municipio)
+        _periodo(w2, p2)
         props = [{"id": r[0], "nome": r[1]} for r in con.execute(text(
             f"SELECT DISTINCT id_propriedade, COALESCE(propriedade, 'Propriedade ' || id_propriedade) "
             f"FROM {TABLE} WHERE {' AND '.join(w2)} ORDER BY 2"), p2)]

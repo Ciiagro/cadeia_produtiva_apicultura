@@ -330,7 +330,7 @@ function preenche(sel, itens){
   sel.value = itens.includes(atual) ? atual : '';
 }
 async function carregaFiltros(){
-  const f = await (await fetch('/api/filtros?'+new URLSearchParams({projeto:$('proj').value, supervisor:$('sup').value, tecnico:$('tec').value, municipio:$('mun').value, situacao:$('sit').value}))).json();
+  const f = await (await fetch('/api/filtros?'+new URLSearchParams({projeto:$('proj').value, supervisor:$('sup').value, tecnico:$('tec').value, municipio:$('mun').value, situacao:$('sit').value, de:$('de').dataset.ok?$('de').value:'', ate:$('de').dataset.ok?$('ate').value:''}))).json();
   if(!$('de').dataset.ok){ f.meses.forEach(m=>{$('de').add(new Option(m,m)); $('ate').add(new Option(m,m));}); $('de').value=f.meses[0];
     // abre sempre no último mês FECHADO: se o mais recente é o mês atual (ainda em lançamento), usa o anterior
     const hoje = new Date(), atual = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
@@ -463,7 +463,8 @@ async function atualiza(){
       `<td class="sep">${nf.format(x.producao_media_produtor)}</td><td>${pct(x.var_prod_media_pct)}</td></tr>`).join('') + '</tbody>';
 }
 ['proj','sup','tec','mun','sit'].forEach(id => $(id).onchange = async () => { await carregaFiltros(); atualiza(); });
-['prop','de','ate'].forEach(i=>$(i).onchange=atualiza);
+$('prop').onchange=atualiza;
+['de','ate'].forEach(i=>$(i).onchange=async()=>{ await carregaFiltros(); atualiza(); });
 $('btnAtualiza').onclick = async()=>{ await carregaFiltros(); atualiza(); };
 // Excel da tabela mensal: usa exatamente os dados na tela, ou seja, já respeitando todos os filtros
 function baixaExcel(){
