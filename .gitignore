@@ -1,0 +1,15 @@
+.env
+venv/
+__pycache__/
+.vercel/
+*.pyc
+bloco.txt
+_referencia_bovino/
+notas.txt
+COLAR_NO_VERCEL.txt
+index.html.bak_*
+stale-*
+
+sql/_ref_fruticultura/
+app/frutas_faixa.jpg
+index.html.bak_*
