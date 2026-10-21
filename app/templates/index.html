@@ -12,22 +12,24 @@
 <style>
   :root{
     --bg:#fffaeb; --surf:#ffffff; --ink:#2a2210; --mut:#6a5a3d; --linha:#f1e6c4; --suave:#fffcf2;
-    --verde:#c98a00; --verde-esc:#7a4a00; --pos:#2e7d4f; --neg:#b3261e;
-    --c-receita:#c98a00; --c-venda:#0b7a80; --c-prod:#2b59a8; --c-media:#8a5a9e; --c-mat:#7c8a1c; --c-un:#8a4b2a; --c-mleite:#3d7a3a; --c-neutro:#6a5a3d; --c-desp:#c0392b;
+    --verde:#d98f00; --verde-esc:#6b3d00; --pos:#2e7d4f; --neg:#b3261e;
+    --c-receita:#d98f00; --c-venda:#0b7a80; --c-prod:#2b59a8; --c-media:#8a5a9e; --c-mat:#7c8a1c; --c-un:#8a4b2a; --c-mleite:#3d7a3a; --c-neutro:#6a5a3d; --c-desp:#c0392b;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
   body{margin:0;font:15px/1.45 'IBM Plex Sans',system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
   :focus-visible{outline:3px solid #f0b429;outline-offset:2px;border-radius:6px}
 
-  .faixa{position:relative;overflow:hidden;background:linear-gradient(90deg,#7a4a00,#c98a00 45%,#f2c53d);color:#fff;padding:16px 30px;display:flex;align-items:center;gap:18px;min-height:96px}
+  .faixa{position:relative;overflow:hidden;background:linear-gradient(90deg,#6b3d00,#d98f00 38%,#ffc400 78%,#ffd84a);color:#fff;padding:16px 30px;display:flex;align-items:center;gap:18px;min-height:96px}
   .faixa::before{content:"";position:absolute;top:0;right:150px;bottom:0;width:55%;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cg fill='none' stroke='white' stroke-opacity='.28' stroke-width='1.6'%3E%3Cpath d='M28 2l26 15v30L28 62 2 47V17z'/%3E%3Cpath d='M28 64l26 15v30'/%3E%3Cpath d='M28 64L2 79v30'/%3E%3C/g%3E%3C/svg%3E") right center/56px 97px repeat;-webkit-mask-image:linear-gradient(90deg,transparent,#000 45%);mask-image:linear-gradient(90deg,transparent,#000 45%)}
-  .faixa>.abelhas{position:absolute;right:210px;top:0;bottom:0;width:360px;pointer-events:none;z-index:1}
+  .faixa>.abelhas{position:absolute;right:210px;top:0;bottom:0;width:760px;pointer-events:none;z-index:1}
   .ab{position:absolute;width:54px;height:41px;filter:drop-shadow(0 2px 3px rgba(60,42,0,.35));animation:zumbir 5s ease-in-out infinite}
-  .ab1{right:270px;top:14px;transform:rotate(-8deg)} .ab2{right:150px;top:52px;width:40px;height:30px;animation-delay:-1.7s;transform:rotate(6deg)} .ab3{right:70px;top:8px;width:34px;height:26px;animation-delay:-3.1s;transform:rotate(-14deg)}
+  .ab1{right:610px;top:12px;transform:rotate(-8deg)} .ab2{right:500px;top:54px;width:40px;height:30px;animation-delay:-1.7s;transform:rotate(6deg)} .ab3{right:420px;top:6px;width:34px;height:26px;animation-delay:-3.1s;transform:rotate(-14deg)}
+  .ab4{right:340px;top:48px;width:50px;height:38px;animation-delay:-.8s;transform:rotate(10deg)} .ab5{right:250px;top:10px;width:44px;height:33px;animation-delay:-2.4s;transform:rotate(-5deg)} .ab6{right:170px;top:56px;width:36px;height:27px;animation-delay:-4s;transform:rotate(12deg)}
+  .ab7{right:90px;top:14px;width:48px;height:36px;animation-delay:-1.2s;transform:rotate(-12deg)} .ab8{right:10px;top:50px;width:32px;height:24px;animation-delay:-3.6s;transform:rotate(8deg)}
   @keyframes zumbir{0%,100%{translate:0 0}50%{translate:6px -5px}}
   @media(prefers-reduced-motion:reduce){.ab{animation:none}}
-  @media(max-width:900px){.abelhas{display:none}}
+  @media(max-width:1100px){.abelhas{display:none}}
   .faixa::after{content:"";position:absolute;top:0;right:0;bottom:0;width:190px;background:linear-gradient(270deg,rgba(60,42,0,.55),rgba(60,42,0,.4) 70%,rgba(60,42,0,0))}
   .faixa>*{position:relative;z-index:1}
   .faixa .sep{width:1px;align-self:stretch;margin:6px 0;background:rgba(255,255,255,.35)}
@@ -191,6 +193,11 @@
   <svg class="ab ab1"><use href="#abelha"/></svg>
   <svg class="ab ab2"><use href="#abelha"/></svg>
   <svg class="ab ab3"><use href="#abelha"/></svg>
+  <svg class="ab ab4"><use href="#abelha"/></svg>
+  <svg class="ab ab5"><use href="#abelha"/></svg>
+  <svg class="ab ab6"><use href="#abelha"/></svg>
+  <svg class="ab ab7"><use href="#abelha"/></svg>
+  <svg class="ab ab8"><use href="#abelha"/></svg>
 </div>
   <svg class="logo" viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 30 32 10l24 20"/><path d="M14 27v24h36V27"/><path d="M26 51V37h12v14"/><path d="M32 8c4-5 10-5 12-3-1 5-6 7-12 3z"/></svg>
   <span class="sep" aria-hidden="true"></span>
