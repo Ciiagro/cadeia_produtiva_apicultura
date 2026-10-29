@@ -13,3 +13,6 @@ stale-*
 sql/_ref_fruticultura/
 app/frutas_faixa.jpg
 index.html.bak_*
+
+*.bak_*
+*.bak

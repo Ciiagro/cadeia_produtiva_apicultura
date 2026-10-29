@@ -14,7 +14,7 @@ Abas: Gráficos, Destaques do mês, Causas (entradas/saídas, preço por animal,
 - Mel vendido (kg) = itens "Venda de mel ..." (granel, envasado, envazado, ensacado). Enxames vendidos = itens "Venda de Enxame ..." (com e sem caixa).
 - Receita bruta = tudo da receita menos empréstimo e investimento (venda de bem).
 - Despesa direta = despesas menos empréstimo, investimento, aleitamento artificial, formação de forrageiras perene,
-  mão de obra familiar e mel consumido pela mão de obra familiar. Aquisição de cera CONTA como despesa direta. (hipótese a validar)
+  mão de obra familiar. O mel consumido pela mão de obra familiar CONTA (como o SisATeG). Aquisição de cera CONTA como despesa direta. (hipótese a validar)
 - Entradas/saídas de propriedades: pelo primeiro/último mês com lançamento (a venda de corte é irregular, não dá para usar só a venda).
 - O painel começa em jun/2024 (`MES_INICIO` no SQL e no app; o corte tem dados desde 2020).
 
