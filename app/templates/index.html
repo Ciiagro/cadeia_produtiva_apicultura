@@ -774,8 +774,8 @@ function desenhaMacro(){
     ${semBase.length || semLancRef.length ? `<details class="mini"><summary>Quem não aparece nas barras (${semBase.length + semLancRef.length})</summary>${semBase.length ? `<p><b>Sem propriedade comparável (novas):</b> ${semBase.join(', ')}.</p>` : ''}${semLancRef.length ? `<p><b>Sem lançamento de leite em ${ref} (fora do painel neste mês):</b> ${semLancRef.join(', ')}.</p>` : ''}</details>` : ''}
     ${modoVal ? rankHtml : `<div class="cv" style="height:${Math.max(300, 22 * ncres + 70)}px"><canvas id="cCres"></canvas></div>`}
     </div><div>
-    <h3 class="c-tit">Evolução de ${MM[met].toLowerCase()} por ${nivel}</h3>
-    <p class="d-resumo">Os 8 maiores no período De/Até.</p>
+    <h3 class="c-tit" id="macTit">Evolução de ${MM[met].toLowerCase()} por ${nivel}</h3>
+    <p class="d-resumo" id="macSub">Os 8 maiores no período De/Até.</p>
     <div class="cv" style="height:${Math.max(300, Math.min(22 * ncres + 70, 520))}px"><canvas id="cMacro"></canvas></div>
     </div></div>
     ${volta}
@@ -785,7 +785,7 @@ function desenhaMacro(){
     <p class="d-resumo">Verde = cresceu, vermelho = caiu em relação ao mesmo mês do ano anterior (intensidade até ±50%). Cinza com “–” = sem lançamento no mês (não é queda de 100%).${usaLfl && (met === 'rec' || met === 'prod') ? ' Comparação só com as propriedades que lançaram nos dois meses.' : ''}${grupos.length > 40 ? ' Mostra os 40 maiores em ' + ref + '.' : ''}</p>${hm}</details>`;
   box.querySelectorAll('.rk[data-reg]').forEach(row => row.onclick = async () => {
     const sub = row.nextElementSibling, nm = row.dataset.reg;
-    if (!sub.hidden) { sub.hidden = true; row.querySelector('b').textContent = '▸ ' + nm; return; }
+    if (!sub.hidden) { sub.hidden = true; row.querySelector('b').textContent = '▸ ' + nm; desenhaMacro(); return; }
     row.querySelector('b').textContent = '▾ ' + nm; sub.hidden = false; sub.innerHTML = '<p class="d-vazio">Carregando municípios…</p>';
     try {
       const q = new URLSearchParams({cadeia: 'apicultura', nivel: 'municipio', regiao: nm, situacao: $('sit').value, ate: $('ate').value});
@@ -798,6 +798,21 @@ function desenhaMacro(){
         <span style="background:#e9efe9;border-radius:4px;height:6px;display:block"><span style="display:block;height:6px;border-radius:4px;background:#5d9b7a;width:${Math.max(2, z.cur / mx * 100)}%"></span></span>
         <span style="text-align:right;font-variant-numeric:tabular-nums">${fm(met, z.cur)}</span><span style="text-align:right;color:var(--mut)" title="Participação na região">${fmt(z.cur / tt * 100, 1)}%</span></div>`).join('')
         : '<p class="d-vazio">Nenhum município com lançamento em ' + ref + '.</p>';
+      // o gráfico de linhas passa a mostrar os municípios da região escolhida
+      const fx = meses.map((m, i) => i).filter(i => meses[i] >= de && i <= ri);
+      const sm = (dm.grupos || []).map(g => ({nome: g.nome, s: fx.map(i => { const j = dm.meses.indexOf(meses[i]); return j >= 0 ? (g[met][j] || 0) : 0; })}))
+        .sort((a, b) => b.s.reduce((x, y) => x + y, 0) - a.s.reduce((x, y) => x + y, 0)).slice(0, 8);
+      if (sm.length && fx.length && $('cMacro')) {
+        if (charts.cm) charts.cm.destroy();
+        const tk = {color: getComputedStyle(document.documentElement).getPropertyValue('--mut').trim(), font: {size: 11}};
+        charts.cm = new Chart($('cMacro'), {type: 'line',
+          data: {labels: fx.map(i => meses[i]), datasets: sm.map((g, k) => ({label: g.nome, data: g.s, borderColor: MCOR[k % 8], backgroundColor: MCOR[k % 8], tension: .25, pointRadius: 2, borderWidth: 2}))},
+          options: {maintainAspectRatio: false, animation: reduz ? false : undefined, interaction: {mode: 'index', intersect: false},
+            plugins: {legend: {position: 'bottom', labels: {boxWidth: 12, font: {size: 11}}}, tooltip: {callbacks: {label: c => c.dataset.label + ': ' + fm(met, c.parsed.y)}}},
+            scales: {x: {ticks: tk, grid: {display: false}}, y: {ticks: {...tk, callback: x => met === 'rec' ? 'R$ ' + nf.format(x) : nf.format(x)}, beginAtZero: true}}}});
+        $('macTit').textContent = 'Evolução de ' + MM[met].toLowerCase() + ' por município: ' + nm;
+        $('macSub').textContent = 'Os 8 maiores municípios desta região no período De/Até. Clique de novo na região para voltar.';
+      }
     } catch(e) { sub.innerHTML = '<p class="d-vazio">Não consegui carregar os municípios: ' + e.message + '</p>'; }
   });
   box.querySelectorAll('.mvolta').forEach(b => b.onclick = () => { $('mniv').value = 'regiao'; $('reg').value = ''; $('reg').onchange(); });
