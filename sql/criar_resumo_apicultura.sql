@@ -34,7 +34,7 @@ WITH ativas AS (  -- propriedades ATIVAS que têm vínculo ATIVO de APICULTURA
 lanc_ids AS (  -- toda propriedade que já teve lançamento da fruticultura (ativa ou não) desde o início da base
   SELECT DISTINCT id_propriedade FROM public.sisateg_receita_despesa
   WHERE atividade = 'APICULTURA' AND status_item = 'ATIVO' AND tipo_registro = 'PRINCIPAL'
-    AND dt_referencia >= DATE '2024-06-01'
+    AND dt_referencia >= DATE '2023-01-01'
 ),
 todas AS (  -- ativas + inativas que têm lançamento (ativa = TRUE/FALSE)
   SELECT id_propriedade, produtor, tecnico_a, supervisor_a, TRUE AS ativa FROM ativas
@@ -110,7 +110,7 @@ DROP TABLE IF EXISTS tmp_base;
 CREATE TEMP TABLE tmp_base AS
 SELECT r.* FROM public.sisateg_receita_despesa r
 WHERE r.atividade = 'APICULTURA' AND r.status_item = 'ATIVO' AND r.tipo_registro = 'PRINCIPAL'
-  AND r.dt_referencia >= DATE '2024-06-01' AND r.dt_referencia < CURRENT_DATE + 1
+  AND r.dt_referencia >= DATE '2023-01-01' AND r.dt_referencia < CURRENT_DATE + 1
   AND NOT EXISTS (SELECT 1 FROM tmp_visitas_invalidas iv WHERE iv.id = r.id_visita::text)
   AND r.id_propriedade IN (SELECT id_propriedade FROM public.resumo_api_propriedades);
 CREATE INDEX ON tmp_base (id_visita, id_item);
@@ -120,7 +120,7 @@ INSERT INTO tmp_base
 SELECT r.* FROM public.sisateg_receita_despesa r
 WHERE r.atividade = 'APICULTURA' AND r.status_item = 'ATIVO' AND r.tipo_registro = 'DETALHADO'
   AND r.tipo_valor = 'VALOR_UNITARIO' AND r.valor IS NOT NULL
-  AND r.dt_referencia >= DATE '2024-06-01' AND r.dt_referencia < CURRENT_DATE + 1
+  AND r.dt_referencia >= DATE '2023-01-01' AND r.dt_referencia < CURRENT_DATE + 1
   AND NOT EXISTS (SELECT 1 FROM tmp_visitas_invalidas iv WHERE iv.id = r.id_visita::text)
   AND r.id_propriedade IN (SELECT id_propriedade FROM public.resumo_api_propriedades)
   AND EXISTS (SELECT 1 FROM tmp_base q WHERE q.id_visita = r.id_visita AND q.id_item = r.id_item AND q.dt_referencia = r.dt_referencia AND q.tipo_valor = 'QUANTIDADE')

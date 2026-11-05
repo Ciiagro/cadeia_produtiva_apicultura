@@ -278,7 +278,8 @@
     <h2>Conferência com a planilha do SisATeG</h2>
     <p class="d-resumo">Envie a planilha (.xlsx) do SisATeG de <b>um mês</b>. O painel casa cada linha pelo <b>ID da Visita</b> e compara, <b>Receitas</b> com a receita bruta (mais venda de bem e recebimento de empréstimo, que o SisATeG soma em Receitas), <b>Despesas Diretas</b> com a despesa direta e <b>a produção de mel (se a planilha trouxer)</b> com a produção. A planilha só traz propriedades <b>ativas</b>, então por padrão o painel também só conta as ativas; escolha <b>Ativas e inativas</b> para ver também as inativas que estão só no painel. Diferenças de até R$ 1,00 (ou 1 kg) são ignoradas.</p>
     <div class="macro-ctl"><label>Planilha do SisATeG<input type="file" id="confArq" accept=".xlsx,.xls" autocomplete="off"></label>
-      <label>Propriedades do painel<select id="confSit" autocomplete="off"><option value="ativas">Só ativas (como a planilha)</option><option value="todas">Ativas e inativas</option></select></label></div>
+      <label>Propriedades do painel<select id="confSit" autocomplete="off"><option value="ativas">Só ativas (como a planilha)</option><option value="todas">Ativas e inativas</option></select></label>
+      <label>Técnico<select id="confTec" autocomplete="off"><option value="">Todos os técnicos</option></select></label></div>
     <div id="confCorpo"><p class="d-vazio">Escolha a planilha para conferir.</p></div>
   </section>
   <section class="destaques" id="causas" hidden></section>
@@ -881,7 +882,7 @@ async function conferePlanilha(file){
     const linhasTodas = [], meses = new Set();
     dados.forEach(l => { const idv = temVis && g(l, 'ID Visita') != null ? String(g(l, 'ID Visita')).trim() : '', idp = String(g(l, 'ID Propriedade') ?? '').trim(); if (!/^\d+$/.test(temVis ? idv : idp)) return;   // ignora a linha "Total"
       const mes = String(Math.round(numC(g(l, 'Ano')))) + '-' + String(Math.round(numC(g(l, 'Mês')))).padStart(2, '0'); meses.add(mes);
-      linhasTodas.push({visita: idv || idp, id: idp, propriedade: g(l, 'Propriedade'), municipio: g(l, 'Município'),
+      linhasTodas.push({visita: idv || idp, id: idp, propriedade: g(l, 'Propriedade'), municipio: g(l, 'Município'), tecnico: String(g(l, 'Técnico') ?? '').trim(),
         rec: numC(l[cRec]), desp: despDireta(l), prod: temProd ? melKg(l) : 0}); });
     let linhas = linhasTodas, nTreino = 0;
     if (!linhas.length) { box.innerHTML = '<p class="d-vazio">Não encontrei linhas de dados abaixo do cabeçalho.</p>'; return; }
@@ -892,6 +893,11 @@ async function conferePlanilha(file){
     const P0 = d.itens; P0.forEach(p => { p.recC = p.rec + (p.rec_fora || 0); });
     const treinoSet = new Set((d.treino || []).map(String));   // projetos de treinamento não entram no painel: ficam fora da conferência
     linhas = linhasTodas.filter(l => !treinoSet.has(l.id)); nTreino = linhasTodas.length - linhas.length;
+    // filtro por técnico: a lista vem da própria planilha (refeita a cada planilha nova)
+    const tecs = [...new Set(linhas.map(l => l.tecnico).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    if (file !== confTecArq) { $('confTec').innerHTML = '<option value="">Todos os técnicos</option>' + tecs.map(t => `<option>${String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</option>`).join(''); confTecArq = file; }
+    const tecSel = $('confTec').value;
+    if (tecSel) linhas = linhas.filter(l => l.tecnico === tecSel);
     if (!linhas.length) { box.innerHTML = '<p class="d-vazio">Só há propriedades de treinamento nessa planilha.</p>'; return; }
     // casa pelo ID da Visita; se o servidor ainda não tem a coluna id_visita, casa pela propriedade (e avisa)
     const porVisita = new Map(), porProp = new Map();
@@ -901,8 +907,8 @@ async function conferePlanilha(file){
     linhas.forEach(l => { const p = (temVis && d.com_visita) ? porVisita.get(l.visita) : porProp.get(l.id);
       if (!p) { (Math.abs(l.rec) + Math.abs(l.desp) + Math.abs(l.prod) <= 1 ? soZero : soArq).push(l); return; }   // visita sem nenhum lançamento: o painel não mostra (esperado)
       const o = grupo.get(p) || {p, rec: 0, desp: 0, prod: 0, visitas: [], propriedade: l.propriedade, municipio: l.municipio, id: l.id};
-      o.rec += l.rec; o.desp += l.desp; o.prod += l.prod; o.visitas.push(l.visita); grupo.set(p, o); });
-    const P = P0.filter(p => $('confSit').value === 'todas' || p.ativa || grupo.has(p));   // a planilha só traz propriedades ativas; "Ativas e inativas" mostra também as inativas do painel
+      o.tecnico = o.tecnico || l.tecnico; o.rec += l.rec; o.desp += l.desp; o.prod += l.prod; o.visitas.push(l.visita); grupo.set(p, o); });
+    const P = P0.filter(p => ($('confSit').value === 'todas' || p.ativa || grupo.has(p)) && (!tecSel || grupo.has(p) || normC(p.tecnico) === normC(tecSel)));   // a planilha só traz propriedades ativas; "Ativas e inativas" mostra também as inativas do painel
     const A = linhas, dif = [], soPan = P.filter(p => !grupo.has(p));
     grupo.forEach(o => { const dr = o.p.recC - o.rec, dd = o.p.desp - o.desp, dp = o.p.prod - o.prod;
       if (Math.abs(dr) > 1 || Math.abs(dd) > 1 || (temProd && Math.abs(dp) > 1)) dif.push({a: o, p: o.p, dr, dd, dp}); });
@@ -912,8 +918,8 @@ async function conferePlanilha(file){
     const lin = (rot, k, f, kp) => { const a = soma(A, k), p = soma(P, kp || k), df = p - a; return `<tr><td>${rot}</td><td class="n">${f(a)}</td><td class="n">${f(p)}</td><td class="n ${Math.abs(df) > 1 ? 'neg' : ''}">${(df > 0 ? '+' : '') + f(df)}</td></tr>`; };
     const R = x => 'R$ ' + nf.format(Math.round(x * 100) / 100), L = x => nf.format(Math.round(x)) + ' kg';
     const cnt = (rot, n, cor) => `<div class="d-item"><span>${rot}</span><span class="${cor || ''}"><b>${nf.format(n)}</b></span></div>`;
-    const tabDif = dif.length ? `<div class="rolagem" style="max-height:460px"><table class="t-simples"><thead><tr><th>${temVis ? 'ID Visita' : 'ID Propriedade'}</th><th>Propriedade</th><th>Município</th><th class="n">Receita planilha</th><th class="n" title="receita bruta + venda de bem e recebimento de empréstimo (o SisATeG soma tudo em Receitas)">Receita painel</th><th class="n">Δ receita</th><th class="n">Despesa planilha</th><th class="n">Despesa painel</th><th class="n">Δ despesa</th><th class="n">Δ mel (kg)</th></tr></thead><tbody>` +
-      dif.slice(0, 300).map(x => `<tr><td>${x.a.visitas.join(', ')}</td><td>${x.a.propriedade ?? ''}</td><td>${x.a.municipio ?? ''}</td><td class="n">${R(x.a.rec)}</td><td class="n">${R(x.p.recC)}</td><td class="n">${R(x.dr)}</td><td class="n">${R(x.a.desp)}</td><td class="n">${R(x.p.desp)}</td><td class="n">${R(x.dd)}</td><td class="n">${nf.format(Math.round(x.dp))}</td></tr>`).join('') + `</tbody></table></div>${dif.length > 300 ? `<p class="d-resumo">Mostrando as 300 maiores de ${dif.length}. Baixe o arquivo para ver todas.</p>` : ''}` : '';
+    const tabDif = dif.length ? `<div class="rolagem" style="max-height:460px"><table class="t-simples"><thead><tr><th>${temVis ? 'ID Visita' : 'ID Propriedade'}</th><th>Propriedade</th><th>Município</th><th>Técnico</th><th class="n">Receita planilha</th><th class="n" title="receita bruta + venda de bem e recebimento de empréstimo (o SisATeG soma tudo em Receitas)">Receita painel</th><th class="n">Δ receita</th><th class="n">Despesa planilha</th><th class="n">Despesa painel</th><th class="n">Δ despesa</th><th class="n">Δ mel (kg)</th></tr></thead><tbody>` +
+      dif.slice(0, 300).map(x => `<tr><td>${x.a.visitas.join(', ')}</td><td>${x.a.propriedade ?? ''}</td><td>${x.a.municipio ?? ''}</td><td>${x.a.tecnico ?? ''}</td><td class="n">${R(x.a.rec)}</td><td class="n">${R(x.p.recC)}</td><td class="n">${R(x.dr)}</td><td class="n">${R(x.a.desp)}</td><td class="n">${R(x.p.desp)}</td><td class="n">${R(x.dd)}</td><td class="n">${nf.format(Math.round(x.dp))}</td></tr>`).join('') + `</tbody></table></div>${dif.length > 300 ? `<p class="d-resumo">Mostrando as 300 maiores de ${dif.length}. Baixe o arquivo para ver todas.</p>` : ''}` : '';
     const nomeA = l => `visita ${l.visita} · ${l.propriedade ?? ''} (${l.municipio ?? ''})`, nomeP = p => `${p.id} ${p.propriedade ?? ''} (${p.municipio ?? ''})`;
     const lst = (l, f) => l.slice(0, 40).map(f).join('; ') + (l.length > 40 ? '; …' : '');
     box.innerHTML = `${aviso}<p class="d-resumo"><b>Mês conferido: ${mes}</b> — ${ok ? '<span class="pos"><b>tudo bate com o painel</b></span>' : '<span class="neg"><b>há diferenças</b></span>'}</p>
@@ -926,13 +932,14 @@ async function conferePlanilha(file){
       ${soPan.length ? `<details class="mini"><summary>Só no painel</summary><p>${lst(soPan, nomeP)}</p></details>` : ''}
       ${dif.length ? `<h3 class="c-tit">Visitas com valor diferente (maiores diferenças primeiro)</h3>${tabDif}<p><button type="button" id="confBaixa" class="btn">Baixar todas as diferenças (.xlsx)</button></p>` : ''}`;
     const bt = $('confBaixa');
-    if (bt) bt.onclick = () => { const ws = XLSX.utils.json_to_sheet(dif.map(x => ({'ID Visita': x.a.visitas.join(', '), 'ID Propriedade': x.a.id, 'Propriedade': x.a.propriedade, 'Município': x.a.municipio, 'Receita planilha': x.a.rec, 'Receita painel': x.p.recC, 'Δ receita': x.dr, 'Despesa planilha': x.a.desp, 'Despesa painel': x.p.desp, 'Δ despesa': x.dd, 'Produção planilha': x.a.prod, 'Produção painel': x.p.prod, 'Δ produção': x.dp})).concat(soArq.map(x => ({'ID Visita': x.visita, 'ID Propriedade': x.id, 'Propriedade': x.propriedade, 'Município': x.municipio, 'Receita planilha': x.rec, 'Despesa planilha': x.desp, 'Produção planilha': x.prod, 'Observação': 'só na planilha'}))));
+    if (bt) bt.onclick = () => { const ws = XLSX.utils.json_to_sheet(dif.map(x => ({'ID Visita': x.a.visitas.join(', '), 'ID Propriedade': x.a.id, 'Propriedade': x.a.propriedade, 'Município': x.a.municipio, 'Técnico': x.a.tecnico, 'Receita planilha': x.a.rec, 'Receita painel': x.p.recC, 'Δ receita': x.dr, 'Despesa planilha': x.a.desp, 'Despesa painel': x.p.desp, 'Δ despesa': x.dd, 'Produção planilha': x.a.prod, 'Produção painel': x.p.prod, 'Δ produção': x.dp})).concat(soArq.map(x => ({'ID Visita': x.visita, 'ID Propriedade': x.id, 'Propriedade': x.propriedade, 'Município': x.municipio, 'Técnico': x.tecnico, 'Receita planilha': x.rec, 'Despesa planilha': x.desp, 'Produção planilha': x.prod, 'Observação': 'só na planilha'}))));
       const w2 = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(w2, ws, 'Diferenças'); XLSX.writeFile(w2, 'conferencia_' + mes + '.xlsx'); };
   } catch (e) { box.innerHTML = '<p class="d-vazio">Erro ao conferir: ' + e.message + '</p>'; }
 }
-let confArquivo = null;
-$('confArq').onchange = ev => { confArquivo = ev.target.files[0]; if (confArquivo) conferePlanilha(confArquivo); };
+let confArquivo = null, confTecArq = null;
+$('confArq').onchange = ev => { confArquivo = ev.target.files[0]; confTecArq = null; if (confArquivo) conferePlanilha(confArquivo); };
 $('confSit').onchange = () => { if (confArquivo) conferePlanilha(confArquivo); };
+$('confTec').onchange = () => { if (confArquivo) conferePlanilha(confArquivo); };
 function mostraAba(nome){
   const alvos = {macro:'macro', graficos:'aba-graficos', destaques:'destaques', causas:'causas', tipos:'tipos', tabela:'aba-tabela', conf:'conf'};
   Object.entries(alvos).forEach(([n, id]) => { $(id).hidden = (n !== nome); });

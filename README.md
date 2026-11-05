@@ -16,7 +16,7 @@ Abas: Gráficos, Destaques do mês, Causas (entradas/saídas, preço por animal,
 - Despesa direta = despesas menos empréstimo, investimento, aleitamento artificial, formação de forrageiras perene,
   mão de obra familiar. O mel consumido pela mão de obra familiar CONTA (como o SisATeG). Aquisição de cera CONTA como despesa direta. (hipótese a validar)
 - Entradas/saídas de propriedades: pelo primeiro/último mês com lançamento (a venda de corte é irregular, não dá para usar só a venda).
-- O painel começa em jun/2024 (`MES_INICIO` no SQL e no app; o corte tem dados desde 2020).
+- O painel começa em jan/2023 (`MES_INICIO` no SQL e no app; o corte tem dados desde 2020).
 
 ## Rotina
 1. Rodar a rotina da bovinocultura (passos 1 a 3 do ROTINA_DIARIA.md): a tabela `sisateg_receita_despesa` é a mesma.
