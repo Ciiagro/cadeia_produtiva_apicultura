@@ -468,19 +468,23 @@ async function atualiza(){
   const hoje = new Date(), mesAtual = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
   const parcial = !!ult && ult.mes === mesAtual;   // último mês ainda em andamento (comparação parcial)
   const semParcial = a => parcial ? a.slice(0, -1) : a;
-  const cartao = (rot, valor, variacao, serie, cor, ic) =>
-    `<div class="kpi"><div class="k-topo">${icoGrande(ic, cor)}<span class="k-rot">${rot}</span></div><b${String(valor).includes('-') ? ' class="neg"' : ''}>${valor}</b><div class="k-var">${parcial ? '<span class="parc">em andamento</span>' : (variacao===undefined ? '' : seta(variacao) + '<small>vs. mês anterior</small>')}</div>${spark(semParcial(serie), cor)}</div>`;
-  if (ult) $('periodo').textContent = 'Período: ' + $('de').value + ' a ' + $('ate').value + '  ·  Cartões: ' + ult.mes + (parcial ? ' (mês em andamento)' : '');
+  // Os cartões obedecem ao período escolhido nos filtros: total (ou média mensal) de todos os meses do período.
+  const S = f => d.reduce((a,x)=>a+(+x[f]||0),0);
+  const M = f => { const v = d.map(x=>x[f]).filter(z=>z!=null); return v.length ? v.reduce((a,z)=>a+z,0)/v.length : 0; };
+  const cartao = (rot, valor, sub, serie, cor, ic) =>
+    `<div class="kpi"><div class="k-topo">${icoGrande(ic, cor)}<span class="k-rot">${rot}</span></div><b${String(valor).includes('-') ? ' class="neg"' : ''}>${valor}</b><div class="k-var"><small>${sub}</small>${parcial ? ' <span class="parc">último mês em andamento</span>' : ''}</div>${spark(semParcial(serie), cor)}</div>`;
+  const T_ = 'total no período', MM_ = 'média mensal no período';
+  if (ult) $('periodo').textContent = 'Período: ' + $('de').value + ' a ' + $('ate').value + '  ·  Cartões: total do período' + (parcial ? ' (último mês em andamento)' : '');
   $('kpis').innerHTML = ult ? [
-    `<div class="kpi"><div class="k-topo">${icoGrande('favo','#e8590c')}<span class="k-rot">${$('sit').value==='inativa' ? 'Propriedades inativas' : 'Propriedades ativas'}</span></div><b>${nf.format(ult.propriedades_total)}</b><div class="k-var">${nf.format(ult.propriedades)} com lançamento no mês</div>${spark(semParcial(d.map(x=>x.propriedades)),'#e8590c')}</div>`,
-    cartao('Renda bruta da atividade', brl2(ult.receita_bruta), ult.var_receita_pct, d.map(x=>x.receita_bruta), '#f59f00', 'moedas'),
-    cartao('Renda bruta do mel', brl2(ult.venda_leite), ult.var_venda_leite_pct, d.map(x=>x.venda_leite), '#12a4a8', 'pote'),
-    cartao('Margem bruta da atividade', brl2(ult.margem_bruta), ult.var_margem_pct, d.map(x=>x.margem_bruta), '#7cb518', 'barras'),
-    cartao('Margem bruta da venda de mel', brl2(ult.margem_leite), ult.var_margem_leite_pct, d.map(x=>x.margem_leite), '#2fa84f', 'calc'),
-    cartao('Produção de mel (kg)', nf.format(ult.producao), ult.var_producao_pct, d.map(x=>x.producao), '#3b82f6', 'gota'),
-    cartao('Produção de mel / produtor', nf.format(ult.producao_media_produtor), ult.var_prod_media_pct, d.map(x=>x.producao_media_produtor), '#a855f7', 'pessoas'),
-    cartao('Enxames vendidos', nf.format(ult.unidades||0), ult.var_unidades_pct, d.map(x=>x.unidades), '#ff7a1a', 'abelha'),
-    cartao('Enxames vendidos por produtor', nf.format(ult.unidades_media_produtor||0), ult.var_un_media_pct, d.map(x=>x.unidades_media_produtor), '#f0589a', 'pessoas')
+    `<div class="kpi"><div class="k-topo">${icoGrande('favo','#e8590c')}<span class="k-rot">${$('sit').value==='inativa' ? 'Propriedades inativas' : 'Propriedades ativas'}</span></div><b>${nf.format(ult.propriedades_total)}</b><div class="k-var">${nf.format(ult.propriedades)} com lançamento em ${ult.mes} (último mês)</div>${spark(semParcial(d.map(x=>x.propriedades)),'#e8590c')}</div>`,
+    cartao('Renda bruta da atividade', brl2(S('receita_bruta')), T_, d.map(x=>x.receita_bruta), '#f59f00', 'moedas'),
+    cartao('Renda bruta do mel', brl2(S('venda_leite')), T_, d.map(x=>x.venda_leite), '#12a4a8', 'pote'),
+    cartao('Margem bruta da atividade', brl2(S('margem_bruta')), T_, d.map(x=>x.margem_bruta), '#7cb518', 'barras'),
+    cartao('Margem bruta da venda de mel', brl2(S('margem_leite')), T_, d.map(x=>x.margem_leite), '#2fa84f', 'calc'),
+    cartao('Produção de mel (kg)', nf.format(S('producao')), T_, d.map(x=>x.producao), '#3b82f6', 'gota'),
+    cartao('Produção de mel / produtor', nf.format(M('producao_media_produtor')), MM_, d.map(x=>x.producao_media_produtor), '#a855f7', 'pessoas'),
+    cartao('Enxames vendidos', nf.format(S('unidades')), T_, d.map(x=>x.unidades), '#ff7a1a', 'abelha'),
+    cartao('Enxames vendidos por produtor', nf.format(M('unidades_media_produtor')), MM_, d.map(x=>x.unidades_media_produtor), '#f0589a', 'pessoas')
   ].join('') : '<p>Sem dados para o filtro.</p>';
   carregaMacro();
   carregaDestaques(q, parcial);
